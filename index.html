@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Groq Lyric Transcriber - AI-Powered Song Analysis</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-music"></i>
+                    <h1>Groq Lyric Transcriber</h1>
+                </div>
+                <div class="header-info">
+                    <span class="model-badge">Whisper-Large-V3-Turbo</span>
+                    <div class="status-indicator" id="statusIndicator">
+                        <div class="status-dot"></div>
+                        <span>Ready</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Left Panel - Input Controls -->
+            <div class="left-panel">
+                <div class="panel-header">
+                    <h2><i class="fas fa-upload"></i> Audio Input</h2>
+                </div>
+
+                <!-- Input Methods -->
+                <div class="input-section">
+                    <div class="input-tabs">
+                        <button class="tab-btn active" data-tab="url">
+                            <i class="fas fa-link"></i> URL
+                        </button>
+                        <button class="tab-btn" data-tab="upload">
+                            <i class="fas fa-file-audio"></i> Upload
+                        </button>
+                    </div>
+
+                    <!-- URL Input Tab -->
+                    <div class="tab-content active" id="url-tab">
+                        <div class="input-group">
+                            <label for="audioUrl">Audio URL</label>
+                            <div class="input-wrapper">
+                                <input type="url" id="audioUrl" placeholder="https://example.com/song.mp3" />
+                                <button class="validate-btn" id="validateUrl">
+                                    <i class="fas fa-check"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- File Upload Tab -->
+                    <div class="tab-content" id="upload-tab">
+                        <div class="upload-area" id="uploadArea">
+                            <div class="upload-content">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <p>Drag & drop your audio file here</p>
+                                <span>or</span>
+                                <button class="browse-btn">Browse Files</button>
+                                <input type="file" id="fileInput" accept="audio/*" hidden />
+                            </div>
+                        </div>
+                        <div class="file-info" id="fileInfo" style="display: none;">
+                            <div class="file-details">
+                                <i class="fas fa-file-audio"></i>
+                                <div>
+                                    <span class="file-name"></span>
+                                    <span class="file-size"></span>
+                                </div>
+                            </div>
+                            <button class="remove-file" id="removeFile">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Configuration Options -->
+                <div class="config-section">
+                    <h3><i class="fas fa-cog"></i> Configuration</h3>
+                    
+                    <div class="config-group">
+                        <label for="language">Language Hint</label>
+                        <select id="language">
+                            <option value="">Auto-detect</option>
+                            <option value="en">English</option>
+                            <option value="es">Spanish</option>
+                            <option value="fr">French</option>
+                            <option value="de">German</option>
+                            <option value="it">Italian</option>
+                            <option value="pt">Portuguese</option>
+                            <option value="ja">Japanese</option>
+                            <option value="ko">Korean</option>
+                            <option value="zh">Chinese</option>
+                        </select>
+                    </div>
+
+                    <div class="config-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="includeStructure" checked />
+                            <span class="checkmark"></span>
+                            Include song structure (Verse, Chorus, etc.)
+                        </label>
+                    </div>
+
+                    <div class="config-group">
+                        <label for="timestamping">Timestamping</label>
+                        <select id="timestamping">
+                            <option value="none">No timestamps</option>
+                            <option value="line">Line-by-line timestamps</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- API Configuration -->
+                <div class="api-section">
+                    <h3><i class="fas fa-key"></i> API Settings</h3>
+                    
+                    <div class="config-group">
+                        <label for="apiKey">Groq API Key</label>
+                        <div class="api-key-info">
+                            <a href="https://console.groq.com/keys" target="_blank" class="api-key-link">
+                                <i class="fas fa-external-link-alt"></i>
+                                Get your free API key
+                            </a>
+                            <span class="free-note">• Free tier available</span>
+                        </div>
+                        <div class="input-wrapper">
+                            <input type="password" id="apiKey" placeholder="Enter your Groq API key" />
+                            <button class="toggle-visibility" id="toggleApiKey">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="config-group">
+                        <label for="temperature">Temperature</label>
+                        <div class="slider-wrapper">
+                            <input type="range" id="temperature" min="0" max="2" step="0.1" value="1" />
+                            <span class="slider-value">1.0</span>
+                        </div>
+                    </div>
+
+                    <div class="config-group">
+                        <label for="maxTokens">Max Tokens</label>
+                        <input type="number" id="maxTokens" value="8192" min="1" max="32768" />
+                    </div>
+                </div>
+
+                <!-- Action Button -->
+                <div class="action-section">
+                    <button class="transcribe-btn" id="transcribeBtn">
+                        <i class="fas fa-play"></i>
+                        <span>Start Transcription</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Right Panel - Results -->
+            <div class="right-panel">
+                <div class="panel-header">
+                    <h2><i class="fas fa-file-text"></i> Transcription Results</h2>
+                    <div class="panel-actions">
+                        <button class="action-btn" id="gradeBtn" disabled title="Analyze & Grade Lyrics">
+                            <i class="fas fa-graduation-cap"></i>
+                        </button>
+                        <button class="action-btn" id="copyBtn" disabled>
+                            <i class="fas fa-copy"></i>
+                        </button>
+                        <button class="action-btn" id="downloadBtn" disabled>
+                            <i class="fas fa-download"></i>
+                        </button>
+                        <button class="action-btn" id="clearBtn">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Progress Indicator -->
+                <div class="progress-container" id="progressContainer" style="display: none;">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    <div class="progress-text" id="progressText">Initializing...</div>
+                </div>
+
+                <!-- Results Area -->
+                <div class="results-container">
+                    <div class="welcome-state" id="welcomeState">
+                        <div class="welcome-content">
+                            <i class="fas fa-microphone-alt"></i>
+                            <h3>Ready to Transcribe</h3>
+                            <p>Upload an audio file or provide a URL to get started with AI-powered lyric transcription.</p>
+                            <div class="features-list">
+                                <div class="feature">
+                                    <i class="fas fa-bolt"></i>
+                                    <span>Real-time streaming</span>
+                                </div>
+                                <div class="feature">
+                                    <i class="fas fa-brain"></i>
+                                    <span>AI-powered accuracy</span>
+                                </div>
+                                <div class="feature">
+                                    <i class="fas fa-clock"></i>
+                                    <span>Timestamp support</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="lyrics-output" id="lyricsOutput" style="display: none;">
+                        <div class="lyrics-content" id="lyricsContent"></div>
+                    </div>
+
+                    <div class="error-state" id="errorState" style="display: none;">
+                        <div class="error-content">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <h3>Transcription Error</h3>
+                            <p id="errorMessage">Something went wrong during transcription.</p>
+                            <button class="retry-btn" id="retryBtn">
+                                <i class="fas fa-redo"></i>
+                                Try Again
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="footer-content">
+                <div class="footer-left">
+                    <span>Powered by Groq API</span>
+                    <span class="separator">•</span>
+                    <span>Whisper-Large-V3-Turbo Model</span>
+                </div>
+                <div class="footer-right">
+                    <a href="#" class="footer-link">Documentation</a>
+                    <a href="#" class="footer-link">API Reference</a>
+                    <a href="#" class="footer-link">Support</a>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay" style="display: none;">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <p>Processing audio...</p>
+        </div>
+    </div>
+
+    <script src="song-analysis-engine.js"></script>
+    <script src="grading-interface.js"></script>
+    <script src="suno-integration.js"></script>
+    <script src="groq-whisper-integration.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
